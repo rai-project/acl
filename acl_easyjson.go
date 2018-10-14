@@ -41,8 +41,12 @@ func easyjsonD215af56DecodeGithubComRaiProjectAcl(in *jlexer.Lexer, out *Limit) 
       out.Runtime = time.Duration(in.Int64())
     case "storage":
       out.Storage = uint64(in.Uint64())
-    case "gp_us":
-      out.GPUs = uint64(in.Uint64())
+    case "mount_storage":
+      out.MountStorage = uint64(in.Uint64())
+    case "number_of_gpus":
+      out.NumberOfGPUs = uint64(in.Uint64())
+    case "cpu_architecture":
+      out.CPUArchitecture = string(in.String())
     default:
       in.AddError(&jlexer.LexerError{
           Offset: in.GetPos(),
@@ -81,15 +85,35 @@ func easyjsonD215af56EncodeGithubComRaiProjectAcl(out *jwriter.Writer, in Limit)
     }
     out.Uint64(uint64(in.Storage))
   }
-  if in.GPUs != 0 {
-    const prefix string = ",\"gp_us\":"
+  if in.MountStorage != 0 {
+    const prefix string = ",\"mount_storage\":"
     if first {
       first = false
       out.RawString(prefix[1:])
     } else {
       out.RawString(prefix)
     }
-    out.Uint64(uint64(in.GPUs))
+    out.Uint64(uint64(in.MountStorage))
+  }
+  if in.NumberOfGPUs != 0 {
+    const prefix string = ",\"number_of_gpus\":"
+    if first {
+      first = false
+      out.RawString(prefix[1:])
+    } else {
+      out.RawString(prefix)
+    }
+    out.Uint64(uint64(in.NumberOfGPUs))
+  }
+  if in.CPUArchitecture != "" {
+    const prefix string = ",\"cpu_architecture\":"
+    if first {
+      first = false
+      out.RawString(prefix[1:])
+    } else {
+      out.RawString(prefix)
+    }
+    out.String(string(in.CPUArchitecture))
   }
   out.RawByte('}')
 }
@@ -159,6 +183,8 @@ func easyjsonD215af56DecodeGithubComRaiProjectAcl1(in *jlexer.Lexer, out *ACL) {
         }
         in.Delim(']')
       }
+    case "docker_push":
+      out.DockerPush = bool(in.Bool())
     case "limit":
       (out.Limit).UnmarshalEasyJSON(in)
     default:
@@ -217,6 +243,16 @@ func easyjsonD215af56EncodeGithubComRaiProjectAcl1(out *jwriter.Writer, in ACL) 
       }
       out.RawByte(']')
     }
+  }
+  if in.DockerPush {
+    const prefix string = ",\"docker_push\":"
+    if first {
+      first = false
+      out.RawString(prefix[1:])
+    } else {
+      out.RawString(prefix)
+    }
+    out.Bool(bool(in.DockerPush))
   }
   if true {
     const prefix string = ",\"limit\":"

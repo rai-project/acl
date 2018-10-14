@@ -1,11 +1,8 @@
 package acl
 
 import (
-	"math"
 	"strings"
-	"time"
 
-	humanize "github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 )
 
@@ -15,83 +12,32 @@ const (
 	All = "all"
 )
 
-var Roles = []Role{
-	"ece408_student",
-	"student",
-	"guest",
-	"power",
-	"admin",
+var (
+	Roles = []Role{}
+)
+
+func getRoles() {
+	ACLs.Range(func(key, value interface{}) bool {
+		name, ok := key.(Role)
+		if !ok {
+			return true
+		}
+		Roles = append(Roles, Role(strings.ToLower(string(name))))
+		return true
+	})
 }
 
 func (r Role) ToACL() (ACL, error) {
-	switch r {
-	case "ece408_student":
-		return ACL{
-			MountAccess:   false,
-			NetworkAccess: false,
-			QueueAccess:   []string{"rai-raiders"},
-			Limit: Limit{
-				Runtime:         5 * time.Minute,
-				Storage:         10 * humanize.MiByte,
-				MountStorage:    0,
-				NumberOfGPUs:    1,
-				CPUArchitecture: "amd64",
-			},
-		}, nil
-	case "student":
-		return ACL{
-			MountAccess:   false,
-			NetworkAccess: false,
-			QueueAccess:   []string{All},
-			Limit: Limit{
-				Runtime:         time.Hour,
-				Storage:         humanize.GiByte,
-				MountStorage:    humanize.GiByte,
-				NumberOfGPUs:    math.MaxUint64,
-				CPUArchitecture: All,
-			},
-		}, nil
-	case "guest":
-		return ACL{
-			MountAccess:   true,
-			NetworkAccess: false,
-			QueueAccess:   []string{All},
-			Limit: Limit{
-				Runtime:         time.Hour,
-				Storage:         humanize.GiByte,
-				MountStorage:    humanize.GiByte,
-				NumberOfGPUs:    math.MaxUint64,
-				CPUArchitecture: All,
-			},
-		}, nil
-	case "power":
-		return ACL{
-			MountAccess:   true,
-			NetworkAccess: true,
-			QueueAccess:   []string{All},
-			Limit: Limit{
-				Runtime:         10 * time.Hour,
-				Storage:         humanize.GiByte,
-				MountStorage:    10 * humanize.GiByte,
-				NumberOfGPUs:    math.MaxUint64,
-				CPUArchitecture: All,
-			},
-		}, nil
-	case "admin":
-		return ACL{
-			MountAccess:   true,
-			NetworkAccess: true,
-			QueueAccess:   []string{All},
-			Limit: Limit{
-				Runtime:         math.MaxInt64,
-				Storage:         math.MaxUint64,
-				MountStorage:    math.MaxUint64,
-				NumberOfGPUs:    math.MaxUint64,
-				CPUArchitecture: All,
-			},
-		}, nil
+	s := strings.ToLower(string(r))
+	val, ok := ACLs.Load(s)
+	if !ok {
+		return ACL{}, errors.Errorf("the role %v is not valid. valid roles are %v", r, Roles)
 	}
-	return ACL{}, errors.Errorf("the role %v is not valid. valid roles are %v", r, Roles)
+	acl, ok := val.(ACL)
+	if !ok {
+		return ACL{}, errors.Errorf("the role %v is not valid type. valid roles are %v", r, Roles)
+	}
+	return acl, nil
 }
 
 func (r0 Role) Validate() bool {

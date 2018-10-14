@@ -7,6 +7,7 @@ type ACL struct {
 	NetworkAccess bool     `json:"network_access,omitempty"`
 	MountAccess   bool     `json:"mount_access,omitempty"`
 	QueueAccess   []string `json:"queue_access,omitempty"`
+	DockerPush    bool     `json:"docker_push,omitempty"`
 	Limit         Limit    `json:"limit,omitempty"`
 }
 
