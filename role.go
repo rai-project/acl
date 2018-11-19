@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// roles are essentially permission groups
 type Role string
 
 const (
@@ -13,6 +14,8 @@ const (
 )
 
 var (
+	// A list of all the roles. Currently, the roles
+	// are defined statically within the program
 	Roles = []Role{}
 )
 
