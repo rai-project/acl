@@ -12,7 +12,7 @@ var ACLs sync.Map
 
 func init() {
 	defer getRoles()
-	ACLs.Store(Role("ece408_student"),
+	ACLs.Store(Role("ece408"),
 		ACL{
 			MountAccess:   false,
 			NetworkAccess: false,
